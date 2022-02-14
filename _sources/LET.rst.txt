@@ -1,5 +1,5 @@
-LET Language
-===========
+LET: A Simple Language
+======================
 
 代码：:download:`let.py <scripts/let.py>`
 

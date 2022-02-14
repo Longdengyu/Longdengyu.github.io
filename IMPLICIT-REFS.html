@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>IMPLICIT-REFS: A Language with Explicit References &#8212; eopl notes  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="EXPLICIT-REFS: A Language with Explicit References" href="EXPLICIT-REFS.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="implicit-refs-a-language-with-explicit-references">
+<h1>IMPLICIT-REFS: A Language with Explicit References<a class="headerlink" href="#implicit-refs-a-language-with-explicit-references" title="Permalink to this headline">¶</a></h1>
+<p>代码：<a class="reference download internal" download="" href="_downloads/267326d7a417d1fef42510e5565ed7fe/proc.py"><code class="xref download docutils literal notranslate"><span class="pre">proc.py</span></code></a></p>
+<p>PROC 语言增加了函数定义和函数调用两个表达式，语法如下：</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    syntax:</span>
+<span class="sd">    Program ::= Expression</span>
+<span class="sd">            a-program(exp1)</span>
+
+<span class="sd">    Expression ::= Number</span>
+<span class="sd">                const-exp(num)</span>
+
+<span class="sd">    Expression ::= - (Expression, Expression)</span>
+<span class="sd">                diff-exp(exp1, exp2)</span>
+
+<span class="sd">    Expression ::= zero? (Expression)</span>
+<span class="sd">                zero?-exp(exp1)</span>
+
+<span class="sd">    Expression ::= if Expression then Expression else Expression</span>
+<span class="sd">                if-exp(exp1, exp2, exp3)</span>
+
+<span class="sd">    Expression ::= Identifier</span>
+<span class="sd">                var-exp(var)</span>
+
+<span class="sd">    Expression ::= let Identifier = Expression in Expression</span>
+<span class="sd">                let-exp (var, exp1, body)</span>
+
+<span class="hll"><span class="sd">    Expression ::= proc (Identifier) Expression</span>
+</span><span class="hll"><span class="sd">                proc-exp (var, body)</span>
+</span><span class="hll">
+</span><span class="hll"><span class="sd">    Expression ::= (rator rand)</span>
+</span><span class="hll"><span class="sd">                call-exp(rator rand)</span>
+</span><span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</td></tr></table></div>
+<p>值的类型增加了Proc，注意这个东西是first class的</p>
+<p>ExpVal = Int+Bool+Proc</p>
+<p>DenVal = Int+Bool+Proc</p>
+<p>该语言的运行效果如下</p>
+<img alt="_images/proc_run.png" src="_images/proc_run.png" />
+<p>mekemult 这部分代码是典型的利用Y combinator 在没有递归语法特性支持的语言
+里面实现递归，这是 first class function 厉害的地方。</p>
+<p>proc expression 在evaluate的时候会返回一个procedure对象，也就是闭包，
+闭包是自带干粮（env）的，调用procedure的时候用的env是闭包自己的env。这里给用 Procedure 类来表示
+procedure。</p>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Procedure</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span><span class="n">Exp</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span><span class="n">Env</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="n">var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+</pre></div>
+</td></tr></table></div>
+<p>ExpVal可以是procedure，这里给它增加一个variant</p>
+<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ProcVal</span><span class="p">(</span><span class="n">ExpVal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span><span class="n">Exp</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span><span class="n">Env</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">procedure</span> <span class="o">=</span> <span class="n">Procedure</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">to_proc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">procedure</span>
+</pre></div>
+</td></tr></table></div>
+<p>parser 增加一些处理逻辑</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_proc_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;PROC&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;LEFT_P&quot;</span><span class="p">)</span>
+        <span class="n">id_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;RIGHT_P&quot;</span><span class="p">)</span>
+        <span class="n">exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ProcExp</span><span class="p">(</span><span class="n">id_token</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">parse_call_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;LEFT_P&quot;</span><span class="p">)</span>
+        <span class="n">rator_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="n">rand_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">&quot;RIGHT_P&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CallExp</span><span class="p">(</span><span class="n">rator_exp</span><span class="p">,</span> <span class="n">rand_exp</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>evaluate的规则也很简单，ProcExp 不必说，evaluate CallExp 的时候使用的env是procedure的env再扩展形参后的env</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">ProcExp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ProcVal</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">CallExp</span><span class="p">):</span>
+        <span class="n">proc_val</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rator</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">procedure</span> <span class="o">=</span> <span class="n">proc_val</span><span class="o">.</span><span class="n">to_proc</span><span class="p">()</span>
+
+        <span class="n">rand_val</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rand</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">procedure</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">ExtendEnv</span><span class="p">(</span><span class="n">procedure</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">rand_val</span><span class="p">,</span> <span class="n">procedure</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">eopl notes</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="介绍.html">EOPL 介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LET.html">LET: A Simple Language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PROC.html">PROC: A Language with Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LETREC.html">LETREC: A Language with Recursive Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EXPLICIT-REFS.html">EXPLICIT-REFS: A Language with Explicit References</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IMPLICIT-REFS: A Language with Explicit References</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="EXPLICIT-REFS.html" title="previous chapter">EXPLICIT-REFS: A Language with Explicit References</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, lantern.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/IMPLICIT-REFS.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
