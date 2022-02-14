@@ -1,25 +1,24 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LETREC: A Language with Recursive Procedures &#8212; eopl notes  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="EXPLICIT-REFS: A Language with Explicit References" href="EXPLICIT-REFS.html" />
     <link rel="prev" title="PROC: A Language with Procedures" href="PROC.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -29,117 +28,77 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="letrec-a-language-with-recursive-procedures">
 <h1>LETREC: A Language with Recursive Procedures<a class="headerlink" href="#letrec-a-language-with-recursive-procedures" title="Permalink to this headline">¶</a></h1>
 <p>代码：<a class="reference download internal" download="" href="_downloads/0b804d2edaa8b773773bc6100b24adf7/letrec.py"><code class="xref download docutils literal notranslate"><span class="pre">letrec.py</span></code></a></p>
 <p>LETREC 语言增加了递归函数，语法如下：</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    syntax:</span>
-<span class="sd">    Program ::= Expression</span>
-<span class="sd">            a-program(exp1)</span>
-
-<span class="sd">    Expression ::= Number</span>
-<span class="sd">                const-exp(num)</span>
-
-<span class="sd">    Expression ::= - (Expression, Expression)</span>
-<span class="sd">                diff-exp(exp1, exp2)</span>
-
-<span class="sd">    Expression ::= zero? (Expression)</span>
-<span class="sd">                zero?-exp(exp1)</span>
-
-<span class="sd">    Expression ::= if Expression then Expression else Expression</span>
-<span class="sd">                if-exp(exp1, exp2, exp3)</span>
-
-<span class="sd">    Expression ::= Identifier</span>
-<span class="sd">                var-exp(var)</span>
-
-<span class="sd">    Expression ::= let Identifier = Expression in Expression</span>
-<span class="sd">                let-exp (var, exp1, body)</span>
-
-<span class="sd">    Expression ::= proc (Identifier) Expression</span>
-<span class="sd">                proc-exp (var, body)</span>
-
-<span class="sd">    Expression ::= (rator, rand)</span>
-<span class="sd">                call-exp(rator, rand)</span>
-
-<span class="hll"><span class="sd">    Expression ::= letrec Identifier (Identifier) = Expression in Expression</span>
-</span><span class="hll"><span class="sd">                letrec-exp (p-name b-var p-body letrec-body)</span>
-</span><span class="sd">&quot;&quot;&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 2</span><span class="sd">    syntax:</span>
+<span class="linenos"> 3</span><span class="sd">    Program ::= Expression</span>
+<span class="linenos"> 4</span><span class="sd">            a-program(exp1)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="sd">    Expression ::= Number</span>
+<span class="linenos"> 7</span><span class="sd">                const-exp(num)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="sd">    Expression ::= - (Expression, Expression)</span>
+<span class="linenos">10</span><span class="sd">                diff-exp(exp1, exp2)</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="sd">    Expression ::= zero? (Expression)</span>
+<span class="linenos">13</span><span class="sd">                zero?-exp(exp1)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="sd">    Expression ::= if Expression then Expression else Expression</span>
+<span class="linenos">16</span><span class="sd">                if-exp(exp1, exp2, exp3)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="sd">    Expression ::= Identifier</span>
+<span class="linenos">19</span><span class="sd">                var-exp(var)</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="sd">    Expression ::= let Identifier = Expression in Expression</span>
+<span class="linenos">22</span><span class="sd">                let-exp (var, exp1, body)</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="sd">    Expression ::= proc (Identifier) Expression</span>
+<span class="linenos">25</span><span class="sd">                proc-exp (var, body)</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="sd">    Expression ::= (rator, rand)</span>
+<span class="linenos">28</span><span class="sd">                call-exp(rator, rand)</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="hll"><span class="sd">    Expression ::= letrec Identifier (Identifier) = Expression in Expression</span>
+</span><span class="linenos">31</span><span class="hll"><span class="sd">                letrec-exp (p-name b-var p-body letrec-body)</span>
+</span><span class="linenos">32</span><span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 <p>该语言的运行效果如下</p>
 <img alt="_images/letrec_run.png" src="_images/letrec_run.png" />
 <p>evaluate letrec表达式的时候</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2</pre></div></td><td class="code"><div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetRecExp</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">letrec_body</span><span class="p">,</span> <span class="n">LetRecEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">p_name</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="n">env</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetRecExp</span><span class="p">):</span>
+<span class="linenos">2</span>        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">letrec_body</span><span class="p">,</span> <span class="n">LetRecEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">p_name</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="n">env</span><span class="p">))</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 <p>重点在LetRecEnv，根据letrec的语义，如果apply的这个递归函数的name，那么就构造一个
 procedure给它，否则用往老的env里面查。相关逻辑如下：</p>
-<div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LetRecEnv</span><span class="p">(</span><span class="n">Env</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_name</span><span class="p">,</span> <span class="n">b_var</span><span class="p">,</span> <span class="n">p_body</span><span class="p">,</span> <span class="n">saved_env</span><span class="p">:</span> <span class="n">Env</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span> <span class="o">=</span> <span class="n">p_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">b_var</span> <span class="o">=</span> <span class="n">b_var</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span> <span class="o">=</span> <span class="n">p_body</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span> <span class="o">=</span> <span class="n">saved_env</span>
-
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ProcVal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">class</span> <span class="nc">LetRecEnv</span><span class="p">(</span><span class="n">Env</span><span class="p">):</span>
+<span class="linenos"> 2</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_name</span><span class="p">,</span> <span class="n">b_var</span><span class="p">,</span> <span class="n">p_body</span><span class="p">,</span> <span class="n">saved_env</span><span class="p">:</span> <span class="n">Env</span><span class="p">):</span>
+<span class="linenos"> 3</span>        <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span> <span class="o">=</span> <span class="n">p_name</span>
+<span class="linenos"> 4</span>        <span class="bp">self</span><span class="o">.</span><span class="n">b_var</span> <span class="o">=</span> <span class="n">b_var</span>
+<span class="linenos"> 5</span>        <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span> <span class="o">=</span> <span class="n">p_body</span>
+<span class="linenos"> 6</span>        <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span> <span class="o">=</span> <span class="n">saved_env</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+<span class="linenos"> 9</span>        <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span><span class="p">:</span>
+<span class="linenos">10</span>            <span class="k">return</span> <span class="n">ProcVal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+<span class="linenos">11</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">12</span>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 <p>核心代码其实就在apply这个函数里面</p>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -156,7 +115,7 @@ procedure给它，否则用往老的env里面查。相关逻辑如下：</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="介绍.html">EOPL 介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E4%BB%8B%E7%BB%8D.html">EOPL 介绍</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LET.html">LET: A Simple Language</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PROC.html">PROC: A Language with Procedures</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">LETREC: A Language with Recursive Procedures</a></li>
@@ -174,17 +133,23 @@ procedure给它，否则用往老的env里面查。相关逻辑如下：</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -193,8 +158,8 @@ procedure给它，否则用往老的env里面查。相关逻辑如下：</p>
       &copy;2022, lantern.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/LETREC.rst.txt"
