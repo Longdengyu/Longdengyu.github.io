@@ -16,6 +16,8 @@ EOPL notes
    LETREC
    EXPLICIT-REFS
    IMPLICIT-REFS
+   CHECKED
+
 
 Indices and tables
 ==================

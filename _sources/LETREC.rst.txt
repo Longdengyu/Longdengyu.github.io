@@ -7,8 +7,7 @@ LETREC 语言增加了递归函数，语法如下：
 
 .. literalinclude:: scripts/letrec.py
     :language: python 
-    :linenos:
-    :lines: 1-32
+    :lines: 2-31
     :emphasize-lines: 30-31
 
 

@@ -1,24 +1,25 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>EXPLICIT-REFS: A Language with Explicit References &#8212; eopl notes  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="IMPLICIT-REFS: A Language with Explicit References" href="IMPLICIT-REFS.html" />
     <link rel="prev" title="LETREC: A Language with Recursive Procedures" href="LETREC.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -28,59 +29,55 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
-
           <div class="body" role="main">
             
   <div class="section" id="explicit-refs-a-language-with-explicit-references">
 <h1>EXPLICIT-REFS: A Language with Explicit References<a class="headerlink" href="#explicit-refs-a-language-with-explicit-references" title="Permalink to this headline">¶</a></h1>
 <p>代码：<a class="reference download internal" download="" href="_downloads/793c5e9ee2cd21568650c5f336ed529f/explicit-ref.py"><code class="xref download docutils literal notranslate"><span class="pre">explicit-ref.py</span></code></a></p>
 <p>EXPLICIT-REFS 语言增加了引用类型，并提供了操作引用的几个原语</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="linenos"> 2</span><span class="s2">    syntax:</span>
-<span class="linenos"> 3</span><span class="s2">    Program ::= Expression</span>
-<span class="linenos"> 4</span><span class="s2">            a-program(exp1)</span>
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="s2">    Expression ::= Number</span>
-<span class="linenos"> 7</span><span class="s2">                const-exp(num)</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="s2">    Expression ::= - (Expression, Expression)</span>
-<span class="linenos">10</span><span class="s2">                diff-exp(exp1, exp2)</span>
-<span class="linenos">11</span>
-<span class="linenos">12</span><span class="s2">    Expression ::= zero? (Expression)</span>
-<span class="linenos">13</span><span class="s2">                zero?-exp(exp1)</span>
-<span class="linenos">14</span>
-<span class="linenos">15</span><span class="s2">    Expression ::= if Expression then Expression else Expression</span>
-<span class="linenos">16</span><span class="s2">                if-exp(exp1, exp2, exp3)</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span><span class="s2">    Expression ::= Identifier</span>
-<span class="linenos">19</span><span class="s2">                var-exp(var)</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="s2">    Expression ::= let Identifier = Expression in Expression</span>
-<span class="linenos">22</span><span class="s2">                let-exp (var, exp1, body)</span>
-<span class="linenos">23</span>
-<span class="linenos">24</span><span class="s2">    Expression ::= proc (Identifier) Expression</span>
-<span class="linenos">25</span><span class="s2">                proc-exp (var, body)</span>
-<span class="linenos">26</span>
-<span class="linenos">27</span><span class="s2">    Expression ::= (rator, rand)</span>
-<span class="linenos">28</span><span class="s2">                call-exp(rator, rand)</span>
-<span class="linenos">29</span>
-<span class="linenos">30</span><span class="s2">    Expression ::= letrec Identifier (Identifier) = Expression in Expression</span>
-<span class="linenos">31</span><span class="s2">                letrec-exp (p-name b-var p-body letrec-body)</span>
-<span class="linenos">32</span>
-<span class="linenos">33</span><span class="hll"><span class="s2">    Expression ::= newref (Expression)</span>
-</span><span class="linenos">34</span><span class="hll"><span class="s2">                newref-exp (exp1)</span>
-</span><span class="linenos">35</span><span class="hll"><span class="s2">    Expression ::= deref (Expression)</span>
-</span><span class="linenos">36</span><span class="hll"><span class="s2">                deref-exp (exp1)</span>
-</span><span class="linenos">37</span><span class="hll"><span class="s2">    Expression ::= setref (Expression , Expression)</span>
-</span><span class="linenos">38</span><span class="hll"><span class="s2">                setref-exp (exp1 exp2)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    syntax:
+    Program ::= Expression
+            a-program(exp1)
+
+    Expression ::= Number
+                const-exp(num)
+
+    Expression ::= - (Expression, Expression)
+                diff-exp(exp1, exp2)
+
+    Expression ::= zero? (Expression)
+                zero?-exp(exp1)
+
+    Expression ::= if Expression then Expression else Expression
+                if-exp(exp1, exp2, exp3)
+
+    Expression ::= Identifier
+                var-exp(var)
+
+    Expression ::= let Identifier = Expression in Expression
+                let-exp (var, exp1, body)
+
+    Expression ::= proc (Identifier) Expression
+                proc-exp (var, body)
+
+    Expression ::= (rator, rand)
+                call-exp(rator, rand)
+
+    Expression ::= letrec Identifier (Identifier) = Expression in Expression
+                letrec-exp (p-name b-var p-body letrec-body)
+
+    Expression ::= newref (Expression)
+<span class="hll">                newref-exp (exp1)
+</span><span class="hll">    Expression ::= deref (Expression)
+</span><span class="hll">                deref-exp (exp1)
+</span><span class="hll">    Expression ::= setref (Expression , Expression)
+</span><span class="hll">                setref-exp (exp1 exp2)
 </span></pre></div>
 </div>
 </div>
 
 
           </div>
-          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -97,12 +94,13 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="%E4%BB%8B%E7%BB%8D.html">EOPL 介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="介绍.html">EOPL 介绍</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LET.html">LET: A Simple Language</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PROC.html">PROC: A Language with Procedures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LETREC.html">LETREC: A Language with Recursive Procedures</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">EXPLICIT-REFS: A Language with Explicit References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="IMPLICIT-REFS.html">IMPLICIT-REFS: A Language with Explicit References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHECKED.html">CHECKED: A Type-Checked Language</a></li>
 </ul>
 
 <div class="relations">
@@ -115,23 +113,17 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
+  <h3>Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -140,8 +132,8 @@
       &copy;2022, lantern.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
       |
       <a href="_sources/EXPLICIT-REFS.rst.txt"

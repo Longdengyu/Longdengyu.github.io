@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>EOPL 介绍 &#8212; eopl notes  documentation</title>
+    <title>CHECKED: A Type-Checked Language &#8212; eopl notes  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="LET: A Simple Language" href="LET.html" />
-    <link rel="prev" title="EOPL notes" href="index.html" />
+    <link rel="prev" title="IMPLICIT-REFS: A Language with Explicit References" href="IMPLICIT-REFS.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -31,12 +30,41 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="eopl">
-<h1>EOPL 介绍<a class="headerlink" href="#eopl" title="Permalink to this headline">¶</a></h1>
-<p>最近对PL比较感兴趣，网上搜了不少PL相关的书，其中EOPL（Essentials of Programming Language）评价比较好，适合入门。</p>
-<p>这本书从最简单的LET language 开始，一步步扩展，最终实现了一个有effect，type，module，oo 这些特性的语言，其中还着重介绍了control context 的显示表示：continuation，让读者在把玩解释器的过程中体会编程语言的核心概念。</p>
-<p>EOPL中的解释器是用scheme写的，词法分析和语法分析用的第三方模块。为了能够更深刻把握其中概念，我决定用python重写一遍其中关键代码，并手动完成词法分析和语法分析部分的工作。</p>
-<p>参考：<a class="reference external" href="https://eopl3.com/">https://eopl3.com/</a></p>
+  <div class="section" id="checked-a-type-checked-language">
+<h1>CHECKED: A Type-Checked Language<a class="headerlink" href="#checked-a-type-checked-language" title="Permalink to this headline">¶</a></h1>
+<p>代码：<a class="reference download internal" download="" href="_downloads/814f77ce3df4ab5cf23197a84ff79270/checked.py"><code class="xref download docutils literal notranslate"><span class="pre">checked.py</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    syntax:
+    Program ::= Expression
+            a-program(exp1)
+
+    Expression ::= Number
+                const-exp(num)
+
+    Expression ::= - (Expression, Expression)
+                diff-exp(exp1, exp2)
+
+    Expression ::= zero? (Expression)
+                zero?-exp(exp1)
+
+    Expression ::= if Expression then Expression else Expression
+                if-exp(exp1, exp2, exp3)
+
+    Expression ::= Identifier
+                var-exp(var)
+
+    Expression ::= let Identifier = Expression in Expression
+                let-exp (var, exp1, body)
+
+<span class="hll">    Expression ::= proc (Identifier: Type) Expression
+</span><span class="hll">                proc-exp (var, body)
+</span><span class="hll">
+</span>    Expression ::= (rator, rand)
+                call-exp(rator, rand)
+
+<span class="hll">    Expression ::= letrec Type Identifier (Identifier: Type) = Expression in Expression
+</span><span class="hll">                letrec-exp (p-name b-var p-body letrec-body)
+</span></pre></div>
+</div>
 </div>
 
 
@@ -57,21 +85,20 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">EOPL 介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="介绍.html">EOPL 介绍</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LET.html">LET: A Simple Language</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PROC.html">PROC: A Language with Procedures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LETREC.html">LETREC: A Language with Recursive Procedures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EXPLICIT-REFS.html">EXPLICIT-REFS: A Language with Explicit References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="IMPLICIT-REFS.html">IMPLICIT-REFS: A Language with Explicit References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CHECKED.html">CHECKED: A Type-Checked Language</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CHECKED: A Type-Checked Language</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">EOPL notes</a></li>
-      <li>Next: <a href="LET.html" title="next chapter">LET: A Simple Language</a></li>
+      <li>Previous: <a href="IMPLICIT-REFS.html" title="previous chapter">IMPLICIT-REFS: A Language with Explicit References</a></li>
   </ul></li>
 </ul>
 </div>
@@ -99,7 +126,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
       |
-      <a href="_sources/介绍.rst.txt"
+      <a href="_sources/CHECKED.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

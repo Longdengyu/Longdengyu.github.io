@@ -7,8 +7,7 @@ PROC 语言增加了函数定义和函数调用两个表达式，语法如下：
 
 .. literalinclude:: scripts/proc.py
     :language: python 
-    :linenos:
-    :lines: 1-29
+    :lines: 2-28
     :emphasize-lines: 24-28
 
 
