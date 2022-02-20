@@ -17,6 +17,7 @@ EOPL notes
    EXPLICIT-REFS
    IMPLICIT-REFS
    CHECKED
+   INFERRED
 
 
 Indices and tables
