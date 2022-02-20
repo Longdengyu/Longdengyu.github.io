@@ -35,6 +35,93 @@
   <div class="section" id="implicit-refs-a-language-with-explicit-references">
 <h1>IMPLICIT-REFS: A Language with Explicit References<a class="headerlink" href="#implicit-refs-a-language-with-explicit-references" title="Permalink to this headline">¶</a></h1>
 <p>代码：<a class="reference download internal" download="" href="_downloads/b2e8a84b0c193f8889a6de32211fcab9/implicit-ref.py"><code class="xref download docutils literal notranslate"><span class="pre">implicit-ref.py</span></code></a></p>
+<p>IMPLICIT-REFS
+隐式 reference 风格的语言有很多，比如我们日常遇到的java，python。</p>
+<p>看下语法</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    syntax:
+    Program ::= Expression
+            a-program(exp1)
+
+    Expression ::= Number
+                const-exp(num)
+
+    Expression ::= - (Expression, Expression)
+                diff-exp(exp1, exp2)
+
+    Expression ::= zero? (Expression)
+                zero?-exp(exp1)
+
+    Expression ::= if Expression then Expression else Expression
+                if-exp(exp1, exp2, exp3)
+
+    Expression ::= Identifier
+                var-exp(var)
+
+    Expression ::= let Identifier = Expression in Expression
+                let-exp (var, exp1, body)
+
+    Expression ::= proc (Identifier) Expression
+                proc-exp (var, body)
+
+    Expression ::= (rator, rand)
+                call-exp(rator, rand)
+
+    Expression ::= letrec Identifier (Identifier) = Expression in Expression
+                letrec-exp (p-name b-var p-body letrec-body)
+
+<span class="hll">    Expression ::= set Identifier = Expression
+</span><span class="hll">                assign-exp (var exp1)
+</span></pre></div>
+</div>
+<p>语法上只增加了一个 set 表达式</p>
+<p>再看下运行效果：</p>
+<img alt="_images/implicit-refs_run.png" src="_images/implicit-refs_run.png" />
+<p>算法很简单，n每减1，num 加2，直到n为0，然后输出num，这是很明显的
+implicit reference。</p>
+<p>在implicit-refs里面，可以直观地看出 expval和denval的区别</p>
+<img alt="_images/implicit-refs_value_spec.png" src="_images/implicit-refs_value_spec.png" />
+<p>变量现在只能是 reference</p>
+<p>针对implicit reference的语言，这里首先问的问题是，我手上有一个变量var，我对其求值需要做
+哪些操作？</p>
+<p>分2步走：</p>
+<ol class="arabic simple">
+<li><p>取得var对应的reference对象</p></li>
+<li><p>根据reference对象取得其引用的内容</p></li>
+</ol>
+<img alt="_images/implicit-refs_eval_spec.png" src="_images/implicit-refs_eval_spec.png" />
+<p>和 variable 有关的表达式有：VarExp，LetExp，CallExp，LetRecExp</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetExp</span><span class="p">):</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="n">new_ref</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">ExtendEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">env</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">ProcExp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ProcVal</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">CallExp</span><span class="p">):</span>
+        <span class="n">proc_val</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rator</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">procedure</span> <span class="o">=</span> <span class="n">proc_val</span><span class="o">.</span><span class="n">to_proc</span><span class="p">()</span>
+        <span class="n">rand_val</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rand</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="n">new_ref</span><span class="p">(</span><span class="n">rand_val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">procedure</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">ExtendEnv</span><span class="p">(</span><span class="n">procedure</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">procedure</span><span class="o">.</span><span class="n">env</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetRecExp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">letrec_body</span><span class="p">,</span> <span class="n">LetRecEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">p_name</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="n">env</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>LetRec的核心处理在这</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LetRecEnv</span><span class="p">(</span><span class="n">Env</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_name</span><span class="p">,</span> <span class="n">b_var</span><span class="p">,</span> <span class="n">p_body</span><span class="p">,</span> <span class="n">saved_env</span><span class="p">:</span> <span class="n">Env</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span> <span class="o">=</span> <span class="n">p_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b_var</span> <span class="o">=</span> <span class="n">b_var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span> <span class="o">=</span> <span class="n">p_body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span> <span class="o">=</span> <span class="n">saved_env</span>
+
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_name</span><span class="p">:</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">new_ref</span><span class="p">(</span><span class="n">ProcVal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">ref</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 
 
