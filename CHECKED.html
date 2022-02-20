@@ -34,6 +34,16 @@
   <div class="section" id="checked-a-type-checked-language">
 <h1>CHECKED: A Type-Checked Language<a class="headerlink" href="#checked-a-type-checked-language" title="Permalink to this headline">¶</a></h1>
 <p>代码：<a class="reference download internal" download="" href="_downloads/814f77ce3df4ab5cf23197a84ff79270/checked.py"><code class="xref download docutils literal notranslate"><span class="pre">checked.py</span></code></a></p>
+<p>有类型检查的语言在一定程度上可以减少程序员犯错的几率，让一些简单的错误在编码早期被发现。</p>
+<p>类型检查大体上说分为两个流派。</p>
+<ol class="arabic simple">
+<li><p>带类型注解</p></li>
+<li><p>不带类型注解，也叫type inference</p></li>
+</ol>
+<p>java c++ 之类的语言都是带类型注解的。</p>
+<p>有 type inference 的语言有 haskell，高版本的c++的auto 语法一定程度上也可以算是type inference。</p>
+<p>本篇文章主要讲如何给带类型注解的语言做type check。</p>
+<p>首先看语法：proc 表达式的形参增加了类型签名，letrec表达式也是如此。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    syntax:
     Program ::= Expression
             a-program(exp1)
@@ -66,6 +76,57 @@
 </span><span class="hll">                letrec-exp (p-name b-var p-body letrec-body)
 </span></pre></div>
 </div>
+<p>运行示例程序看看：</p>
+<img alt="_images/checked_run.png" src="_images/checked_run.png" />
+<p>针对这种带类型注解的语言，类型检查该怎么做呢，EOPL的办法很直接，直接写一个解释器；
+不过这个解释器和我们常见的用来求值的解释器不一样，这个解释器是用来求type的，这其实是在做
+抽象解释（abstract interpretation）。</p>
+<p>具体实现思路 EOPL里面已经讲的很清楚了，这里只展示python的版本</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">type_of</span><span class="p">(</span><span class="n">exp</span><span class="p">:</span> <span class="n">Exp</span><span class="p">,</span> <span class="n">tenv</span><span class="p">:</span> <span class="n">TEnv</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">ConstExp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IntType</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">VarExp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tenv</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">DiffExp</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp2</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">IntType</span><span class="p">(),</span> <span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">)</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">IntType</span><span class="p">(),</span> <span class="n">exp</span><span class="o">.</span><span class="n">exp2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IntType</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">IsZeroExp</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">IntType</span><span class="p">(),</span> <span class="n">exp</span><span class="o">.</span><span class="n">exp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BoolType</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">IFExp</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp2</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">t3</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp3</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">BoolType</span><span class="p">(),</span> <span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">)</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t3</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t2</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetExp</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">exp1</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">TExtendEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">tenv</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">ProcExp</span><span class="p">):</span>
+        <span class="n">var_type</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">var_type</span>
+        <span class="n">result_type</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">TExtendEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">var_type</span><span class="p">,</span> <span class="n">tenv</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ProcType</span><span class="p">(</span><span class="n">var_type</span><span class="p">,</span> <span class="n">result_type</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">CallExp</span><span class="p">):</span>
+        <span class="n">rator_type</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rator</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">rand_type</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">rand</span><span class="p">,</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rator_type</span><span class="p">,</span> <span class="n">ProcType</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;rator_type is not ProcType&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">check_equal_type</span><span class="p">(</span><span class="n">rator_type</span><span class="o">.</span><span class="n">arg_type</span><span class="p">,</span> <span class="n">rand_type</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">rand</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">rator_type</span><span class="o">.</span><span class="n">result_type</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">LetRecExp</span><span class="p">):</span>
+        <span class="n">tenv_for_letrec_body</span> <span class="o">=</span> <span class="n">TExtendEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">p_name</span><span class="p">,</span> <span class="n">ProcType</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">b_var_type</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_result_type</span><span class="p">),</span> <span class="n">tenv</span><span class="p">)</span>
+        <span class="n">p_body_type</span> <span class="o">=</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">p_body</span><span class="p">,</span> <span class="n">TExtendEnv</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">b_var</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">b_var_type</span><span class="p">,</span> <span class="n">tenv_for_letrec_body</span><span class="p">))</span>
+        <span class="n">check_equal_type</span><span class="p">(</span><span class="n">p_body_type</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_result_type</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">p_body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">type_of</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">letrec_body</span><span class="p">,</span> <span class="n">tenv_for_letrec_body</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>其实就是在写解释器，在type_of求值的时候检查各种表达式提供的约束有没有满足要求，不满足就报类型错误。</p>
 </div>
 
 
